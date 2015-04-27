@@ -3,19 +3,18 @@ HOST: https://alletidersapi.dk
 
 # AlletidersAPI.dk
 
-Welcome to the **AlletidersAPI.dk** API.
+Welcome to the Provider interface documentation of the **AlletidersAPI.dk** API.
 
-Useful Links
+## Useful Links
+
 + [Documentation](http://docs.alletidersapi.dk/)
 + [System Overview](http://docs.alletidersapi.dk/overview/)
++ [Sales Channel Documentation](http://docs.alletidersapisaleschannel.apiary.io/)
 
-Title: Provider interface for AlletidersAPI.dk
+## Corrections:
 
-Rettelser:
-==========
-PCM-* (Product Channel Manager) => AlletidersAPI
-Combine Product & Event Booking => AlletidersAPI
-
++ PCM-* (Product Channel Manager) => AlletidersAPI
++ Combine Product & Event Booking => AlletidersAPI
 # Group Product
 
 ## Create Transaction [/provider/product]
@@ -78,6 +77,12 @@ A line can not be deleted.
     + sale (Sale, optional) - A collection of sale data
     + owner (string, optional) - Product owner. Max length: 80
     + calendar (Calendar, optional) - Calendar properties for booking products only
+    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
+        + Default: `da`
+    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
+        + Default: `DKK`
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
 Responses
     + 202: Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
@@ -296,6 +301,12 @@ Responses
 
 + Parameters
     + transaction (number, required) - Transaction ID.
+    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
+        + Default: `da`
+    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
+        + Default: `DKK`
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
 + Response 202
 
@@ -329,6 +340,12 @@ NOTE: Only if an order is made using a sales channel, will the channel id be spe
 
 + Parameters
     + transaction (number, required) - Transaction ID.
+    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
+        + Default: `da`
+    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
+        + Default: `DKK`
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
 + Response 200
 
@@ -484,6 +501,12 @@ Imports the members to Alletiders API. If a member already exists data will be u
 
 + Parameters
     + transaction (number, required) - Transaction ID.
+    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
+        + Default: `da`
+    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
+        + Default: `DKK`
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
 + Response 202
 
