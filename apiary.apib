@@ -15,6 +15,7 @@ Welcome to the Provider interface documentation of the **AlletidersAPI.dk** API.
 
 + PCM-* (Product Channel Manager) => AlletidersAPI
 + Combine Product & Event Booking => AlletidersAPI
+
 # Group Product
 
 ## Create Transaction [/provider/product]
@@ -34,59 +35,19 @@ Create a new product import transaction. The transaction will be used to transfe
 Create and/or update products. Create or update will be determined by the product id, if it already exists an update will be done, otherwise a new product will be created.
 All product attributes are optional, except the “id” and “type”.  In order to disable a product the sales period must be set to an expired date.
 
-NOTE: The request will be completed as soon as the XML document has been transferred. The
+*NOTE:* The request will be completed as soon as the XML document has been transferred. The
 processing of data is done asynchronously afterwards.
 
-Calendar lines
-For booking and accomodation products it is possible to add calendar lines (<calendar>).
-A calendar line is uniquely identified by the combination of:
+See example request
 
-product-id,
-start-date,
-end-date,
-quantity
-
-Active/inactive lines
-When importing a product all the lines are disabled before the actual import and only enabled if there are any matching lines. If there are no matches found on a imported line, it will be created in the system.
-
-As an example, let’s look at an existing product with following calendar data:
-product-id: 1
-start date: 1.September 2013
-end date: 1.November 2013
-quantity: 100
-
-If a line with the same data is imported, the current line is updated to active / inactive.
-If a line with a different quantity, such as 50, is imported, the current line is deactivated and a new quantity line will be added with 50.
-A line can not be deleted.
+For more information see the [online documetation](http://docs.alletidersapi.dk/api/).
 
 + Parameters
     + transaction (number, required) - Transaction ID.
-    + id (number, required) - Product identifier. Max length is 10.
-    + type (required, string) ... Product type. Max length 255.
-        + Values
-            + `standard`
-            + `booking`
-            + `accomodation
-            + `subscription`
-    + title (string, optional) - Product title.
-        + Default: `?????`
-    + intro (string, optional) - Product short description.
-        + Default: `?????`
-    + description (string, optional) - Product description.
-        + Default: `?????`
-    + sale (Sale, optional) - A collection of sale data
-    + owner (string, optional) - Product owner. Max length: 80
-    + calendar (Calendar, optional) - Calendar properties for booking products only
-    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
-        + Default: `da`
-    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
-        + Default: `DKK`
-    + format: `xml` (string, optional) - Either json or xml.
-        + Default: `json`
 
 Responses
-    + 202: Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
-    + 405: Method not allowed - A document has already been PUT to this transaction.
++ 202: Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
++ 405: Method not allowed - A document has already been PUT to this transaction.
 
 + Request Standard product creation - XML example (application/xml)
 
@@ -294,10 +255,10 @@ Responses
 The GET method will show the current status of the import.
 
 Responses
-    + 202: Accepted - The request is pending or processing.
-    + 200: OK - The request was handled with success.
-    + 204: No Content - Nothing was uploaded.
-    + 206: Partial Content - The request caused errors.
++ 202: Accepted - The request is pending or processing.
++ 200: OK - The request was handled with success.
++ 204: No Content - Nothing was uploaded.
++ 206: Partial Content - The request caused errors.
 
 + Parameters
     + transaction (number, required) - Transaction ID.
@@ -430,10 +391,9 @@ Responses
 Members include person, product, and ticket information. Since members are registered to a product, this product needs to be imported before the member is imported (if it does not exist  in Alletiders API already).  Furthermore in order to be able to scan tickets the product type needs to be subscription.
 The member import currently supports two content types: XML and CSV.
 
-The member import process contains 3 steps:
+The member import process contains 2 steps:
 + Create a transaction for the import
 + Send member data
-+ Do the import
 
 ## Create Transaction [/provider/member]
 ### Create Transaction [POST]
@@ -452,11 +412,9 @@ Create a new member import transaction. The resulting transaction can then be us
 Show the current status of the import.
 
 Warnings
-| Code | Description |
-| --- | --- |
-| 995 | This warning will be shown when updating an already imported member with a different product label. The rest will be updated |
-| 1062 | The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs. |
-| 1452 | The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API. |
++ 995: This warning will be shown when updating an already imported member with a different product label. The rest will be updated.
++ 1062: The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
++ 1452: The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API.
 
 Responses
 + 202: Accepted - Pending or processing
@@ -488,25 +446,64 @@ Responses
 
 Imports the members to Alletiders API. If a member already exists data will be updated. Expected file encoding is UTF 8 and content type must be set in the header.
 
-+ Attributes
-    + address (Address, optional)
-    + ticketIdentity (array, required)
-        + code (string, required) - Ticket code. Max length: 255 characters.
-        + type (string, required) - Ticket code type e.g. `EAN8`, `EAN13`, `Code128`.
-        + valid (array, required)
-            + from (DateTime, required)
-            + to (DateTime, required)
-    + product (array, required)
-        + label (number, required) - Product Id that the member has subscribed to, Max length: 10.
+See example request
+
+For more information see the [online documetation](http://docs.alletidersapi.dk/api/).
 
 + Parameters
     + transaction (number, required) - Transaction ID.
-    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
-        + Default: `da`
-    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
-        + Default: `DKK`
-    + format: `xml` (string, optional) - Either json or xml.
-        + Default: `json`
+
++ Request
+
+    + Body
+
+            <?xml version="1.0" encoding="UTF-8"?>
+            <orders>
+                <order>
+                    <members>
+                        <member>
+                            <address>
+                                <name>David Davidoff Davidsen</name>
+                                <address>Gadenavngade 10</address>
+                                <zipCode>8000</zipCode>
+                                <city>Aarhus C</city>
+                                <country>Danmark</country>
+                                <phone>86123456</phone>
+                                <email>david@example.com</email>
+                            </address>
+                            <ticketIdentity>
+                                <code>1234561234568</code>
+                                <type>barcode</type>
+                                <valid>
+                                    <from>2013-01-30T09:00:00+01:00</from>
+                                    <to>2013-05-25T00:00:00+00:00</to>
+                                </valid>
+                            </ticketIdentity>
+                            <product>
+                                <label>423</label>
+                            </product>
+                        </member>
+                        <member>
+                            <address>
+                                <name>William W. Willemoes</name>
+                                <address>Gadenavngade 103B</address>
+                                <zipCode>8240</zipCode>
+                                <city>Risskov</city>
+                                <country>Danmark</country>
+                                <phone>86654321</phone>
+                                <email>will@example.com</email>
+                            </address>
+                            <ticketIdentity>
+                                <code>1231231231233</code>
+                                <type>barcode</type>
+                            </ticketIdentity>
+                            <product>
+                                <label>423</label>
+                            </product>
+                        </member>
+                    </members>
+                </order>
+            </orders>
 
 + Response 202
 
