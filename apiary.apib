@@ -16,7 +16,52 @@ Welcome to the Provider interface documentation of the **AlletidersAPI.dk** API.
 + PCM-* (Product Channel Manager) => AlletidersAPI
 + Combine Product & Event Booking => AlletidersAPI
 
-# Group Product
+## Document Purpose
+
+This document describes the API between providers (attractions) and Alletiders API.
+
+## RESTful service
+
+The API uses RESTful web architecture.
+
+Alletiders API implements CRUD functionality on a series of resources allowing product imports, member imports, and order creations.
+Security, authorization, and identity
+It is required to use https and basic authentication.
+Each provider will be using its own login and hence identity. This will allow Alletiders API to separate the data from the individual providers.
+
+## Auth-token
+
+There is currently no need for an authorization token as we are dealing with pure B2B communication between two trusted servers.
+
+## Data Format
+
+XML is currently the standard supported. For member import, an alternative CSV option is available.
+
+## Barcode types
+
+There are no constraints on the actual barcode types, but it would be good idea to reuse the same barcode type value to avoid duplicates.
+
+Pretty much anything can be sent to the api via member import or via tickets and be treated as barcode type. The same type will be included in order lines when orders are exported.
+
+The following is list is an example list of values that should be used to make integration easier for both parties.
+
+|Barcode Type|Support|
+|---|---|
+|EAN2||
+|EAN5||
+|EAN8|Supported by the Alletiders Api PDF receipt engine.|
+|EAN13|Supported by the Alletiders Api PDF receipt engine.|
+|UPC-A|Supported by the Alletiders Api PDF receipt engine.|
+|UPC-E|Supported by the Alletiders Api PDF receipt engine.|
+|Code128|Supported by the Alletiders Api PDF receipt engine.|
+|Code39|Supported by the Alletiders Api PDF receipt engine.|
+|Code93||
+|i25|Code 25 - Interleaved 2 of 5|
+|QRCode||
+|PostNet|Supported by the Alletiders Api PDF receipt engine.|
+
+
+# Group Product Import
 
 ## Create Transaction [/provider/product]
 ### Create Transaction [POST]
@@ -38,7 +83,134 @@ All product attributes are optional, except the “id” and “type”.  In ord
 *NOTE:* The request will be completed as soon as the XML document has been transferred. The
 processing of data is done asynchronously afterwards.
 
-See example request
+Parameters that you can specify in the request body:
+<pre>
+* required
+** needs to be specified for each language [ISO 639-1 standard e.g. da, en]
+</pre>
+<table>
+    <tr>
+        <td>id*</td>
+        <td>
+            product id  [type: int |maxlength: 10]
+        </td>
+    </tr>
+    <tr>
+        <td>type*</td>
+        <td>
+            product type [type: varchar | maxlength: 255]<br/>
+            Possible values:
+            <ul>
+                <li>standard</li>
+                <li>booking/li>
+                <li>accommodation/li>
+                <li>subscription/li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>title**</td>
+        <td>
+            product title [type: varchar | maxlength: 255]<br/>
+            Defaults to “?????” if omitted during creation.
+        </td>
+    </tr>
+    <tr>
+        <td>intro**</td>
+        <td>
+            product short description [type: text]<br/>
+            Defaults to “?????” if omitted during creation.
+        </td>
+    </tr>
+    <tr>
+        <td>description**</td>
+        <td>
+            product description [type: text|html]<br/>
+            Defaults to “?????” if omitted during creation.
+        </td>
+    </tr>
+    <tr>
+        <td>sale</td>
+        <td>
+            sale can include the following properties:
+            <ul>
+                <li>from  [type: datetime | format:   Y-m-d\TH:i:sP]</li>
+                <li>to [type: datetime | format: Y-m-d\TH:i:sP]</li>
+                <li>price
+                    <ul>
+                                <li>currency  [ISO 4217 format e.g. EUR, DKK ]</li>
+                                <li>value [type: int] (in cents, to avoid rounding errors)</li>
+                                <li>comment [string]</li>
+                    </ul>
+                </li>
+            </ul>
+
+            Standard products supports inventory update:
+            <ul><li>inventory [int] (positive value = add, negative = substract)</li></ul>
+
+            If inventory exists on the product, the new value will be added or substracted to the existing inventory.
+
+            additional options for accommodation only:
+            <ul>
+                <li>interval_length* [number of days/weeks you have to book according to the interval_unit]</li>
+                <li>interval_unit* [possible values: week | day | hour ] </li>
+                <li>week_days* [comma separated list of days as 1-7]</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>owner</td>
+        <td>
+            product owner [type: varchar | maxlength: 80]
+        </td>
+    </tr>
+    <tr>
+        <td>calendar</td>
+        <td>
+            calendar properties for booking products only:
+            <ul>
+                <li>interval_length*  [length of interval as integer value]</li>
+                <li>interval_unit* [possible values: week | day | hour ]</li>
+                <li>sales_deadline*</li>
+                <li>sales_deadline_unit*</li>
+                <li>active* [true |  false]</li>
+                <li>from* [Y-m-d]</li>
+                <li>to* [Y-m-d]</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+#### Calendar lines
+
+For booking and accomodation products it is possible to add calendar lines (<calendar>).
+
+A calendar line is uniquely identified by the combination of:
+    <ul>
+        <li>product-id</li>
+        <li>start-date</li>
+        <li>end-date</li>
+        <li>quantity</li>
+    </ul>
+
+#### Active/inactive lines
+When importing a product all the lines are disabled before the actual import and only enabled if there are any matching lines. If there are no matches found on a imported line, it will be created in the system.
+
+As an example, let’s look at an existing product with following calendar data:
+    <ul>
+        <li>product-id: 1</li>
+        <li>start date: 1.September 2013</li>
+        <li>end date: 1.November 2013</li>
+        <li>quantity: 100</li>
+    </ul>
+
+If a line with the same data is imported, the current line is updated to active / inactive.
+
+If a line with a different quantity, such as 50, is imported, the current line is deactivated and a new quantity line will be added with 50.
+
+*A line can not be deleted.*
+
+**See example requests**
 
 For more information see the [online documetation](http://docs.alletidersapi.dk/api/).
 
@@ -289,24 +461,230 @@ Responses
                 </error>
             </errors>
 
-# Group Order Export
+# Group Member Import
+
+Members include person, product, and ticket information. Since members are registered to a product, this product needs to be imported before the member is imported (if it does not exist  in Alletiders API already).  Furthermore in order to be able to scan tickets the product type needs to be subscription.
+The member import currently supports two content types: XML and CSV.
+
+The member import process contains 2 steps:
++ Create a transaction for the import
++ Send member data
+
+## Create Transaction [/provider/member]
+### Create Transaction [POST]
+
+Create a new member import transaction. The resulting transaction can then be used to import members.
+
++ Response 201
+
+    + Headers
+
+            Location: /provider/member/{transaction}
+
+## Import Members [/provider/member/{transaction}]
+### Import Members [PUT]
+
+Imports the members to Alletiders API. If a member already exists data will be updated. Expected file encoding is UTF-8 and content type must be set in the header.
+
+Parameters that you can specify in the request body:
+<pre>
+* required
+</pre>
+<table>
+    <tr>
+        <td>address*</td>
+        <td>
+            address includes following properties:
+            <ul>
+                <li>name  [type: varchar | maxlength: 255]</li>
+                <li>address  [type: varchar | maxlength: 255]</li>
+                <li>zipCode  [type: varchar | maxlength: 5]</li>
+                <li>city  [type: varchar | maxlength: 64]</li>
+                <li>country  [type: varchar | maxlength: 25]</li>
+                <li>phone  [type: varchar | maxlength: 16]</li>
+                <li>email  [type: varchar | maxlength: 255]</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>ticketIdentity*</td>
+        <td>
+            ticket identity consists of the following properties:
+            ticket code:
+                <ul><li>code*  [type: varchar |maxlength: 255]</li></ul>
+
+            type of the ticket code:
+                <ul><li>type [type: varchar | maxlength:50] See suggested values</li></ul>
+
+            the validation period:
+            <ul>
+                <li>valid
+                    <ul>
+                        <li>from* [type: datetime | format: YYYY-MM-DDThh:mm:ssTZD (W3C)]</li>
+                        <li>to* [type: datetime | format: YYYY-MM-DDThh:mm:ssTZD (W3C)]</li>
+                    </ul>
+                </li>
+            </ul>
+        </td>
+    <tr>
+    <tr>
+        <td>product*</td>
+        <td>
+        product consists of the product id that the member has subscribed to:
+            <ul><li>label*  [type: int | maxlength: 10]</li></ul>
+
+            NOTE: the product needs to be of type subscription.
+        </td>
+    </tr>
+</table>
+
+**See example requests**
+
+For more information see the [online documetation](http://docs.alletidersapi.dk/api/).
+
++ Parameters
+    + transaction (number, required) - Transaction ID.
+
++ Request (application/xml)
+
+    + Body
+
+            <?xml version="1.0" encoding="UTF-8"?>
+            <orders>
+                <order>
+                    <members>
+                        <member>
+                            <address>
+                                <name>David Davidoff Davidsen</name>
+                                <address>Gadenavngade 10</address>
+                                <zipCode>8000</zipCode>
+                                <city>Aarhus C</city>
+                                <country>Danmark</country>
+                                <phone>86123456</phone>
+                                <email>david@example.com</email>
+                            </address>
+                            <ticketIdentity>
+                                <code>1234561234568</code>
+                                <type>barcode</type>
+                                <valid>
+                                    <from>2013-01-30T09:00:00+01:00</from>
+                                    <to>2013-05-25T00:00:00+00:00</to>
+                                </valid>
+                            </ticketIdentity>
+                            <product>
+                                <label>423</label>
+                            </product>
+                        </member>
+                        <member>
+                            <address>
+                                <name>William W. Willemoes</name>
+                                <address>Gadenavngade 103B</address>
+                                <zipCode>8240</zipCode>
+                                <city>Risskov</city>
+                                <country>Danmark</country>
+                                <phone>86654321</phone>
+                                <email>will@example.com</email>
+                            </address>
+                            <ticketIdentity>
+                                <code>1231231231233</code>
+                                <type>barcode</type>
+                            </ticketIdentity>
+                            <product>
+                                <label>423</label>
+                            </product>
+                        </member>
+                    </members>
+                </order>
+            </orders>
+
++ Request (text/csv)
+
+    + Body
+            label;type;code;validFrom;validTo;name;address;zip_code;city;country;phone;email
+            1443;EAN13;1234561234568;2014-01-25T09:00:00+01:00;2014-05-25T00:00:00+00:00;“David Davidoff Davidsen“;“Gadenavngade 10“;8000;“Aarhus C“;“Danmark“;“86123456“;“david@example.com“
+            5237;EAN13;1231231231233;2014-05-25T09:00:00+01:00;2014-05-25T00:00:00+00:00;“William W. Willemoes“;“Gadenavngade 103B“;8240;“Risskov“;“Danmark“;“86654321“;“will@example.com“
+
+
++ Response 202
+
+    + Headers
+
+            Location: /provider/member/{transaction}
+
+### Get status [GET]
+
+Show the current status of the import.
+
+Warnings
++ 995: This warning will be shown when updating an already imported member with a different product label. The rest will be updated.
++ 1062: The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
++ 1452: The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API.
+
+Responses
++ 202: Accepted - Pending or processing
++ 200: OK - Done with success
++ 204: No Content - Nothing was uploaded
++ 206: Partial Content - Done with errors
+
++ Response 202
+
++ Response 200
+
++ Response 204
+
++ Response 206
+
+    + Body
+
+            <?xml version="1.0" encoding="UTF-8"?>
+            <errors xmlns="http://netimage.dk/pcm/provider/order-export">
+                <error>
+                    <sequence>1</sequence>
+                    <id>18</id>
+                    <code>1048</code>
+                    <message>Example text</message>
+                </error>
+            </errors>
+
+# Group Pull Orders (Export)
+
+This method enables the providers to pull a list of orders ready for processing using the Alletiders API. It is then up to the provider to complete the order  process by providing the customer the confirmation mail and the ticket.
+
+![Pull Order](http://docs.alletidersapi.dk/images/apiary/order_anytime.png)
+
+## Order Export [/provider/order-export/]
+### List transactions [GET]
+
+Get list of order export transactions for the "active" provider.
+
++ Response 200
+
+### Create Transaction for Order Export [POST]
+
+Create a new transaction for order export.
+
+Responses
++ 200: OK - Order transaction created
++ 204: No Content - No orders on the transaction or no new orders. Try again later.
+
++ Response 200
+
+    + Headers
+
+            Location: /provider/order-export/{transaction}
+
++ Response 204
 
 ## Order Export [/provider/order-export/{transaction}]
 ### Get Completed Orders [GET]
 
 Get all completed orders for given transaction id. If it is a new transaction, All new orders are marked as exported (with the transaction) and returned.
-If it is an already used transaction, Orders already marked (exported or  tried exported) would be returned
+If it is an already used transaction, Orders already marked (exported or tried exported) would be returned
 
 NOTE: Only if an order is made using a sales channel, will the channel id be specified
 
 + Parameters
     + transaction (number, required) - Transaction ID.
-    + language: `en` (string, optional) - Language to use in ISO 639-1 standard
-        + Default: `da`
-    + currency: `EUR` (string, optional) - The currency to use in ISO 4217 format
-        + Default: `DKK`
-    + format: `xml` (string, optional) - Either json or xml.
-        + Default: `json`
 
 + Response 200
 
@@ -371,147 +749,99 @@ NOTE: Only if an order is made using a sales channel, will the channel id be spe
                 </order>
             </orders>
 
-### Create Transaction for Order Export [POST]
-Create a new transaction for order export.
+# Group Push Orders
 
-Responses
-+ 200: OK - Order transaction created
-+ 204: No Content - No orders on the transaction or no new orders. Try again later.
+## Push Order (realtime)
 
-+ Response 200
+With push orders, the orders are sent in real time to the provider. The provider then needs to send the barcodes back to Alletiders API, which will then create the ticket and complete the order. This requires the provider to implement CRUD functionality for an order and provide a RESTful service for the Alletiders API to fetch the barcodes.
 
-    + Headers
+Depending on the sales channel, alletiders API can be responsible for sending the order confirmation email with the tickets. In order to be able to create them successfully, a barcode must be of type EAN13 or Code39.
 
-            Location: /provider/order-export/{transaction}
+Alternatively, if the sales channel chose to send order confirmations themselves, then the supported barcode types will vary. Please refer to the 'Barcode types' section to decide which barcode name to use.
 
-+ Response 204
+![Push Order](http://docs.alletidersapi.dk/images/apiary/order_realtime.png)
 
-# Group Member Import
+The following section describes examples of requests to a given provider. The endpoint is defined for each provider in the administration panel.
 
-Members include person, product, and ticket information. Since members are registered to a product, this product needs to be imported before the member is imported (if it does not exist  in Alletiders API already).  Furthermore in order to be able to scan tickets the product type needs to be subscription.
-The member import currently supports two content types: XML and CSV.
+The API will keep calling the endpoints until a valid response code is returned. If the provider is down the call will thus be scheduled to execution within near future.
 
-The member import process contains 2 steps:
-+ Create a transaction for the import
-+ Send member data
+## Create order - step 1/2 [/order/]
+### Create new order with order lines. [POST]
 
-## Create Transaction [/provider/member]
-### Create Transaction [POST]
+The first step in push order consists of the Alletiders API making a POST request to the provider with the order data.
 
-Create a new member import transaction. The resulting transaction can then be used to import members.
+productLabel on the line tag is the product id specified when importing product, it will not be included if product was created in admin interface.
+
++ Request (application/xml)
+    + Body
+            <?xml version="1.0" encoding="UTF-8"?>
+            <order id="1">
+                <created>2013-01-30T09:00:00+01:00</created>
+                <modified>2013-01-30T09:00:00+01:00</modified>
+                <address id="3">
+                    <name>gd</name>
+                    <address>gd</address>
+                    <zipCode>gds</zipCode>
+                    <city>gd</city>
+                    <country></country>
+                    <phone></phone>
+                    <email>dtr@netimage.dk</email>
+                </address>
+                <currency>DKK</currency>
+                <channelId>5</channelId>
+                <lines>
+                    <line id="1">
+                        <productDataId>6</productDataId>
+                        <productDataVer>1</productDataVer>
+                        <productLabel>5147</productLabel>
+                        <price>19900</price>
+                        <unitPrice>9950</unitPrice>
+                        <quantity>2</quantity>
+                        <providerId>1</providerId>
+                    </line>
+                </lines>
+            </order>
 
 + Response 201
+    + Header
+            Location: /order/{orderId}
 
-    + Headers
+## Create order - step 2/2 [/order/{orderId}]
+### Get barcodes from provider and execute the order. [GET]
 
-            Location: /provider/member/{transaction}
-
-## Import Members [/provider/member/{transaction}]
-### Get status [GET]
-
-Show the current status of the import.
-
-Warnings
-+ 995: This warning will be shown when updating an already imported member with a different product label. The rest will be updated.
-+ 1062: The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
-+ 1452: The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API.
-
-Responses
-+ 202: Accepted - Pending or processing
-+ 200: OK - Done with success
-+ 204: No Content - Nothing was uploaded
-+ 206: Partial Content - Done with errors
-
-+ Response 202
+The second step consists of the Alletiders API making a GET request to the provider with the order id. Alletiders API expects the provider to return barcodes for the given order id. The orderId used here is the one extracted from location header from previously made POST request.
 
 + Response 200
+    + Header
+            Location: /order/{orderId}
+    + Body
+            <?xml version="1.0" encoding="UTF-8"?>
+            <order>
+                <lines>
+                    <line id="0">
+                        <barcodes>
+                            <barcode type="Code39">Wikipedia</barcode>
+                        </barcodes>
+                    </line>
+                    <line id="1">
+                        <barcodes>
+                            <barcode type="EAN13">899067654321</barcode>
+                            <barcode type="Code39">102467654321</barcode>
+                            <barcode type="Code39">204867654321</barcode>
+                        </barcodes>
+                    </line>
+                </lines>
+            </order>
+
+### Delete order [DELETE]
+
+Deletes an existing order. The orderId used here is the one extracted from location header from previously made POST request.
+
+*NOTE:* If the GET was invoked for this order (ticket identities were created), it is then the responsibility of the provider to do any necessary cleaning in their systems.
 
 + Response 204
 
-+ Response 206
-
-    + Body
-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <errors xmlns="http://netimage.dk/pcm/provider/order-export">
-                <error>
-                    <sequence>1</sequence>
-                    <id>18</id>
-                    <code>1048</code>
-                    <message>Example text</message>
-                </error>
-            </errors>
-
-### Import Members [PUT]
-
-Imports the members to Alletiders API. If a member already exists data will be updated. Expected file encoding is UTF 8 and content type must be set in the header.
-
-See example request
-
-For more information see the [online documetation](http://docs.alletidersapi.dk/api/).
-
-+ Parameters
-    + transaction (number, required) - Transaction ID.
-
-+ Request
-
-    + Body
-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <orders>
-                <order>
-                    <members>
-                        <member>
-                            <address>
-                                <name>David Davidoff Davidsen</name>
-                                <address>Gadenavngade 10</address>
-                                <zipCode>8000</zipCode>
-                                <city>Aarhus C</city>
-                                <country>Danmark</country>
-                                <phone>86123456</phone>
-                                <email>david@example.com</email>
-                            </address>
-                            <ticketIdentity>
-                                <code>1234561234568</code>
-                                <type>barcode</type>
-                                <valid>
-                                    <from>2013-01-30T09:00:00+01:00</from>
-                                    <to>2013-05-25T00:00:00+00:00</to>
-                                </valid>
-                            </ticketIdentity>
-                            <product>
-                                <label>423</label>
-                            </product>
-                        </member>
-                        <member>
-                            <address>
-                                <name>William W. Willemoes</name>
-                                <address>Gadenavngade 103B</address>
-                                <zipCode>8240</zipCode>
-                                <city>Risskov</city>
-                                <country>Danmark</country>
-                                <phone>86654321</phone>
-                                <email>will@example.com</email>
-                            </address>
-                            <ticketIdentity>
-                                <code>1231231231233</code>
-                                <type>barcode</type>
-                            </ticketIdentity>
-                            <product>
-                                <label>423</label>
-                            </product>
-                        </member>
-                    </members>
-                </order>
-            </orders>
-
-+ Response 202
-
-    + Headers
-
-            Location: /provider/member/{transaction}
-
-# Group Language
+# Group Language and Currency
 
 ## Language [/provider/language]
 ### Get Supported Languages [GET]
@@ -574,8 +904,6 @@ Retrieve a list of supported languages.
                 }
             ]
 
-# Group Currency
-
 ## Currency [/provider/currency]
 ### Get Supported Currencies [GET]
 
@@ -636,7 +964,7 @@ Retrieve a list of supported currencies.
     The date and time in the format (Y-m-d H:i:s)
 
 ## Address (object)
-    + name (string,)
+    + name (string)
     + email (string)
     + phone (number)
     + name (string)
@@ -662,7 +990,7 @@ Retrieve a list of supported currencies.
             + `week`
             + `day`
             + `hour`
-    + week_days (number) - For accomodation only. Comma spearated list of days as 1-7
+    + week_days (number) - For accomodation only. Comma separated list of days as 1-7
 
 ## Price (object)
     + currency (string) - ISO 4217 format e.g. EUR, DKK
