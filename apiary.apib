@@ -417,9 +417,13 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
 
     Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
 
+    + Body
+
 + Response 405
 
     Method not allowed - A document has already been PUT to this transaction.
+
+    + Body
 
 ### Get Status [GET]
 
@@ -438,13 +442,19 @@ The GET method will show the current status of the import.
 
     Accepted - The request is pending or processing.
 
+    + Body
+
 + Response 200
 
     OK - The request was handled with success.
 
+    + Body
+
 + Response 204
 
     No Content - Nothing was uploaded.
+
+    + Body
 
 + Response 206
 
@@ -625,13 +635,19 @@ Warnings
 
     Accepted - Pending or processing
 
+    + Body
+
 + Response 200
 
     OK - Done with success
 
+    + Body
+
 + Response 204
 
     No Content - Nothing was uploaded
+
+    + Body
 
 + Response 206
 
@@ -670,6 +686,8 @@ Create a new transaction for order export.
 
     OK - Order transaction created
 
+    + Body
+
     + Headers
 
             Location: /provider/order-export/{transaction}
@@ -677,6 +695,8 @@ Create a new transaction for order export.
 + Response 204
 
     No Content - No orders on the transaction or no new orders. Try again later.
+
+    + Body
 
 ## Order Export [/provider/order-export/{transaction}]
 ### Get Completed Orders [GET]
