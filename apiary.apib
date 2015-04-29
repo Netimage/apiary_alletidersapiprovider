@@ -138,9 +138,9 @@ Parameters that you can specify in the request body:
                 <li>to [type: datetime | format: Y-m-d\TH:i:sP]</li>
                 <li>price
                     <ul>
-                                <li>currency  [ISO 4217 format e.g. EUR, DKK ]</li>
-                                <li>value [type: int] (in cents, to avoid rounding errors)</li>
-                                <li>comment [string]</li>
+                        <li>currency  [ISO 4217 format e.g. EUR, DKK ]</li>
+                        <li>value [type: int] (in cents, to avoid rounding errors)</li>
+                        <li>comment [string]</li>
                     </ul>
                 </li>
             </ul>
@@ -646,7 +646,7 @@ Responses
                 </error>
             </errors>
 
-# Group Pull Orders (Export)
+# Group Pull Orders - Export
 
 This method enables the providers to pull a list of orders ready for processing using the Alletiders API. It is then up to the provider to complete the order  process by providing the customer the confirmation mail and the ticket.
 
@@ -959,50 +959,4 @@ Retrieve a list of supported currencies.
 
     The date in the format (Y-m-d)
 
-## MySQL DateTime (string)
-
-    The date and time in the format (Y-m-d H:i:s)
-
-## Address (object)
-    + name (string)
-    + email (string)
-    + phone (number)
-    + name (string)
-    + address (string)
-    + city (string)
-    + zipCode (number)
-    + country (string)
-        + Default: Denmark
-
-## Product (object)
-    + id (number) - product identifier
-    + qty (number) - quantity, CANNOT be changed later!
-    + allotments (array) - collection of key/value pairs. Pair key is allotment id and value has to be set to true. Allotments can be retrieved via the [ProductAllotment](http://www.example.com) resource.
-
-## Sale (object)
-    + from (DateTime)
-    + to (DateTime)
-    + price (Price)
-    + inventory (number) - Standard products supports inventory update. Positive value = add. Negative = substract.
-    + interval_length (number) - For accomodation only.
-    + interval_unit (string) ... For accomodation only.
-        + Values
-            + `week`
-            + `day`
-            + `hour`
-    + week_days (number) - For accomodation only. Comma separated list of days as 1-7
-
-## Price (object)
-    + currency (string) - ISO 4217 format e.g. EUR, DKK
-    + value (number) - In cents, to avoid rounding errors
-    + comment (string) - A comment
-
-## Calendar (object)
-    + interval_length (number) -  Length of interval
-    + interval_unit (string) - Possible values: week, day, hour
-    + sales_deadline (number)
-    + sales_deadline_unit (string) - Possible values: week, day, hour
-    + active (boolean)
-    + from (Date)
-    + to (Date)
 
