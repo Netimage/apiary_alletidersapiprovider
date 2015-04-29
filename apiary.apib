@@ -215,9 +215,6 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
 + Parameters
     + transaction (number, required) - Transaction ID.
 
-Responses
-+ 202: Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
-+ 405: Method not allowed - A document has already been PUT to this transaction.
 
 + Request Standard product creation - XML example (application/xml)
 
@@ -418,17 +415,15 @@ Responses
 
 + Response 202
 
+    Accepted - The request has been accepted for processing, but the processing has not been completed. GET the same URI to get the result of the import.
+
 + Response 405
+
+    Method not allowed - A document has already been PUT to this transaction.
 
 ### Get Status [GET]
 
 The GET method will show the current status of the import.
-
-Responses
-+ 202: Accepted - The request is pending or processing.
-+ 200: OK - The request was handled with success.
-+ 204: No Content - Nothing was uploaded.
-+ 206: Partial Content - The request caused errors.
 
 + Parameters
     + transaction (number, required) - Transaction ID.
@@ -441,11 +436,19 @@ Responses
 
 + Response 202
 
+    Accepted - The request is pending or processing.
+
 + Response 200
+
+    OK - The request was handled with success.
 
 + Response 204
 
+    No Content - Nothing was uploaded.
+
 + Response 206
+
+    Partial Content - The request caused errors.
 
     + Body
 
@@ -618,19 +621,21 @@ Warnings
 + 1062: The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
 + 1452: The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API.
 
-Responses
-+ 202: Accepted - Pending or processing
-+ 200: OK - Done with success
-+ 204: No Content - Nothing was uploaded
-+ 206: Partial Content - Done with errors
-
 + Response 202
+
+    Accepted - Pending or processing
 
 + Response 200
 
+    OK - Done with success
+
 + Response 204
 
+    No Content - Nothing was uploaded
+
 + Response 206
+
+    Partial Content - Done with errors
 
     + Body
 
@@ -661,17 +666,17 @@ Get list of order export transactions for the "active" provider.
 
 Create a new transaction for order export.
 
-Responses
-+ 200: OK - Order transaction created
-+ 204: No Content - No orders on the transaction or no new orders. Try again later.
-
 + Response 200
+
+    OK - Order transaction created
 
     + Headers
 
             Location: /provider/order-export/{transaction}
 
 + Response 204
+
+    No Content - No orders on the transaction or no new orders. Try again later.
 
 ## Order Export [/provider/order-export/{transaction}]
 ### Get Completed Orders [GET]
