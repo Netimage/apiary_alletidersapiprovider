@@ -11,11 +11,6 @@ Welcome to the Provider interface documentation of the **AlletidersAPI.dk** API.
 + [System Overview](http://docs.alletidersapi.dk/overview/)
 + [Sales Channel Documentation](http://docs.alletidersapisaleschannel.apiary.io/)
 
-## Corrections:
-
-+ PCM-* (Product Channel Manager) => AlletidersAPI
-+ Combine Product & Event Booking => AlletidersAPI
-
 ## Document Purpose
 
 This document describes the API between providers (attractions) and Alletiders API.
@@ -25,8 +20,11 @@ This document describes the API between providers (attractions) and Alletiders A
 The API uses RESTful web architecture.
 
 Alletiders API implements CRUD functionality on a series of resources allowing product imports, member imports, and order creations.
-Security, authorization, and identity
+
+## Security, authorization, and identity
+
 It is required to use https and basic authentication.
+
 Each provider will be using its own login and hence identity. This will allow Alletiders API to separate the data from the individual providers.
 
 ## Auth-token
@@ -102,9 +100,9 @@ Parameters that you can specify in the request body:
             Possible values:
             <ul>
                 <li>standard</li>
-                <li>booking/li>
-                <li>accommodation/li>
-                <li>subscription/li>
+                <li>booking</li>
+                <li>accommodation</li>
+                <li>subscription</li>
             </ul>
         </td>
     </tr>
@@ -132,7 +130,7 @@ Parameters that you can specify in the request body:
     <tr>
         <td>sale</td>
         <td>
-            sale can include the following properties:
+            This is an array with the following key/value pairs:
             <ul>
                 <li>from  [type: datetime | format:   Y-m-d\TH:i:sP]</li>
                 <li>to [type: datetime | format: Y-m-d\TH:i:sP]</li>
@@ -145,16 +143,16 @@ Parameters that you can specify in the request body:
                 </li>
             </ul>
 
-            Standard products supports inventory update:
+            Standard products supports inventory update:<br>
             <ul><li>inventory [int] (positive value = add, negative = substract)</li></ul>
 
-            If inventory exists on the product, the new value will be added or substracted to the existing inventory.
+            If inventory exists on the product, the new value will be added or substracted to the existing inventory.<br>
 
             additional options for accommodation only:
             <ul>
                 <li>interval_length* [number of days/weeks you have to book according to the interval_unit]</li>
                 <li>interval_unit* [possible values: week | day | hour ] </li>
-                <li>week_days* [comma separated list of days as 1-7]</li>
+                <li>week_days* [comma separated list of days as 1-7, 1 = Monday, 7 = Sunday]</li>
             </ul>
         </td>
     </tr>
@@ -183,7 +181,7 @@ Parameters that you can specify in the request body:
 
 #### Calendar lines
 
-For booking and accomodation products it is possible to add calendar lines (<calendar>).
+For booking and accomodation products it is possible to add calendar lines (\<calendar\>).
 
 A calendar line is uniquely identified by the combination of:
     <ul>
@@ -494,7 +492,7 @@ Parameters that you can specify in the request body:
     <tr>
         <td>address*</td>
         <td>
-            address includes following properties:
+            address includes following properties:<br>
             <ul>
                 <li>name  [type: varchar | maxlength: 255]</li>
                 <li>address  [type: varchar | maxlength: 255]</li>
@@ -509,14 +507,14 @@ Parameters that you can specify in the request body:
     <tr>
         <td>ticketIdentity*</td>
         <td>
-            ticket identity consists of the following properties:
-            ticket code:
+            ticket identity consists of the following properties:<br>
+            ticket code:<br>
                 <ul><li>code*  [type: varchar |maxlength: 255]</li></ul>
 
-            type of the ticket code:
+            type of the ticket code:<br>
                 <ul><li>type [type: varchar | maxlength:50] See suggested values</li></ul>
 
-            the validation period:
+            the validation period:<br>
             <ul>
                 <li>valid
                     <ul>
@@ -530,7 +528,7 @@ Parameters that you can specify in the request body:
     <tr>
         <td>product*</td>
         <td>
-        product consists of the product id that the member has subscribed to:
+            product consists of the product id that the member has subscribed to:<br>
             <ul><li>label*  [type: int | maxlength: 10]</li></ul>
 
             NOTE: the product needs to be of type subscription.
