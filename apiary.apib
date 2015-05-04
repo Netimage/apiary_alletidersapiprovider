@@ -43,20 +43,16 @@ Pretty much anything can be sent to the api via member import or via tickets and
 
 The following is list is an example list of values that should be used to make integration easier for both parties.
 
-|Barcode Type|Support|
-|---|---|
-|EAN2||
-|EAN5||
-|EAN8|Supported by the Alletiders Api PDF receipt engine.|
-|EAN13|Supported by the Alletiders Api PDF receipt engine.|
-|UPC-A|Supported by the Alletiders Api PDF receipt engine.|
-|UPC-E|Supported by the Alletiders Api PDF receipt engine.|
-|Code128|Supported by the Alletiders Api PDF receipt engine.|
-|Code39|Supported by the Alletiders Api PDF receipt engine.|
-|Code93||
-|i25|Code 25 - Interleaved 2 of 5|
-|QRCode||
-|PostNet|Supported by the Alletiders Api PDF receipt engine.|
+### Supported types
+
++ EAN8
++ EAN13
++ UPC-A
++ UPC-E
++ Code128
++ Code39
++ i25
++ PostNet
 
 
 # Group Product Import
@@ -458,7 +454,7 @@ The GET method will show the current status of the import.
 
 + Response 206
 
-    Partial Content - The request caused errors.
+    Partial Content - Done with errors
 
     + Body
 
@@ -468,7 +464,7 @@ The GET method will show the current status of the import.
                     <sequence>1</sequence>
                     <id>18</id>
                     <code>1048</code>
-                    <message>Example text</message>
+                    <message>Column cannot be null</message>
                 </error>
             </errors>
 
@@ -628,7 +624,7 @@ Show the current status of the import.
 
 Warnings
 + 995: This warning will be shown when updating an already imported member with a different product label. The rest will be updated.
-+ 1062: The code exist for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
++ 1062: The code exists for another provider. If this happens the import will be interrupted and nothing will be imported. Please contact Combine if this error occurs.
 + 1452: The product-id (product label) does not exist. Please check if `<product><label>xxx</label></product>` is specified correctly and that the product exists in Alletiders API.
 
 + Response 202
@@ -660,8 +656,8 @@ Warnings
                 <error>
                     <sequence>1</sequence>
                     <id>18</id>
-                    <code>1048</code>
-                    <message>Example text</message>
+                    <code>1062</code>
+                    <message>The member code already exists on a different provider or with different barcode type. Nothing was imported. Please contact support for detailed information</message>
                 </error>
             </errors>
 
@@ -671,12 +667,87 @@ This method enables the providers to pull a list of orders ready for processing 
 
 ![Pull Order](http://docs.alletidersapi.dk/images/apiary/order_anytime.png)
 
-## Order Export [/provider/order-export/]
+## Order Export [/provider/order-export/?format={format}]
 ### List transactions [GET]
 
 Get list of order export transactions for the "active" provider.
 
-+ Response 200
++ Parameters
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
+
++ Response 200 (application/xml)
+
+    + Body
+
+            <?xml version="1.0" encoding="UTF-8"?>
+            <transactions>
+              <transaction id="2">
+                <location>/provider/order-export/2?format=xml</location>
+                <insertTime>2015-04-30T10:56:18+00:00</insertTime>
+                <modified>2015-04-30T10:56:32+00:00</modified>
+                <name/>
+                <count>107</count>
+                <user id="292">
+                  <email>pwa@combine.dk</email>
+                  <name>Peter Warnes</name>
+                </user>
+                <iDate>2015-04-30</iDate>
+                <iTime>10:56:18</iTime>
+              </transaction>
+              <transaction id="1">
+                <location>/provider/order-export/1?format=xml</location>
+                <insertTime>2015-04-30T10:55:54+00:00</insertTime>
+                <name/>
+                <user id="292">
+                  <email>pwa@combine.dk</email>
+                  <name>Peter Warnes</name>
+                </user>
+                <iDate>2015-04-30</iDate>
+                <iTime>10:55:54</iTime>
+              </transaction>
+            </transactions>
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "id":2,
+                    "location":"\/provider\/order-export\/2?format=json",
+                    "insertTime":"2015-04-30T10:56:18+00:00",
+                    "modified":"2015-04-30T10:56:32+00:00",
+                    "comment":null,
+                    "name":{},
+                    "count":107,
+                    "user":
+                    {
+                        "id":292,
+                        "email":"pwa@combine.dk",
+                        "name":"Peter Warnes"
+                    },
+                    "iDate":"2015-04-30",
+                    "iTime":"10:56:18"
+                },
+                {
+                    "id":1,
+                    "location":"\/provider\/order-export\/1?format=json",
+                    "insertTime":"2015-04-30T10:55:54+00:00",
+                    "modified":null,
+                    "comment":null,
+                    "name":{},
+                    "count":null,
+                    "user":
+                    {
+                        "id":292,
+                        "email":"pwa@combine.dk",
+                        "name":"Peter Warnes"
+                    },
+                    "iDate":"2015-04-30",
+                    "iTime":"10:55:54"
+                }
+            ]
 
 ### Create Transaction for Order Export [POST]
 
@@ -698,7 +769,7 @@ Create a new transaction for order export.
 
     + Body
 
-## Order Export [/provider/order-export/{transaction}]
+## Order Export [/provider/order-export/{transaction}?format={format}]
 ### Get Completed Orders [GET]
 
 Get all completed orders for given transaction id. If it is a new transaction, All new orders are marked as exported (with the transaction) and returned.
@@ -708,63 +779,84 @@ NOTE: Only if an order is made using a sales channel, will the channel id be spe
 
 + Parameters
     + transaction (number, required) - Transaction ID.
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
-+ Response 200
++ Response 200 (application/xml)
 
     + Body
 
             <?xml version="1.0" encoding="UTF-8"?>
             <orders xmlns="http://netimage.dk/pcm/provider/order-export">
-                <order id="7">
-                    <insertTime>2013-02-07T14:46:23+01:00</insertTime>
-                    <modified>2013-02-08T12:37:04+01:00</modified>
-                    <address id="3">
-                        <name>John Doe</name>
-                        <address>Evergreen Terrace 742</address>
-                        <zipCode>1000</zipCode>
-                        <city>København K</city>
-                        <country>Denmark</country>
-                        <phone></phone>
-                        <email>jd@example.com</email>
+                <order id="908">
+                    <insertTime>2014-09-05T10:17:22+00:00</insertTime>
+                    <modified>2014-09-05T10:42:02+00:00</modified>
+                    <address id="267">
+                        <name>Lone nielsen</name>
+                        <address>Strandvejen 42</address>
+                        <zipCode>3399</zipCode>
+                        <city>Hundested</city>
+                        <country>Danmark</country>
+                        <email>Spwm@hotmail.com</email>
+                        <newsletter>0</newsletter>
+                        <newsletterPartners>0</newsletterPartners>
                     </address>
-                    <channelId>3</channelId>
-                    <currency>EUR</currency>
+                    <channelId>1</channelId>
+                    <currency>DKK</currency>
                     <orderLines>
-                        <orderLine id="23">
-                            <quantity>2</quantity>
+                        <orderLine id="1220">
+                            <quantity>1</quantity>
                             <prices>
-                                <price id="54">
-                                    <value>26000</value>
+                                <price id="undefined">
+                                    <value>49500</value>
                                 </price>
                             </prices>
-                            <product id="6" ver="1">
-                                <title>Dobbeltværelse (pris for 2 pers.)</title>
+                            <product id="749" ver="7">
+                                <title>80-Ã¥rs jubilÃ¦umstur fra Hundested-GrenÃ¥</title>
                             </product>
                             <ticketIdentities>
-                                <ticketIdentity id="23">
+                                <ticketIdentity id="636">
                                     <type>barcode</type>
-                                    <code>8705647250635</code>
-                                    <barcodeType>EAN13</barcodeType>
+                                    <code>7610039911562</code>
                                     <scanLog/>
+                                    <barcodeType>EAN13</barcodeType>
                                 </ticketIdentity>
                             </ticketIdentities>
                         </orderLine>
-                        <orderLine id="24">
-                            <quantity>2</quantity>
+                    </orderLines>
+                </order>
+                <order id="916">
+                    <insertTime>2014-09-05T13:58:30+00:00</insertTime>
+                    <modified>2014-09-05T14:01:40+00:00</modified>
+                    <address id="268">
+                        <name>Gotschalk Rejser</name>
+                        <address>Thorsgade 57</address>
+                        <zipCode>8410</zipCode>
+                        <city>RÃ¸nde</city>
+                        <phone>50226622</phone>
+                        <email>gotschalk@mail.dk</email>
+                        <newsletter>0</newsletter>
+                        <newsletterPartners>0</newsletterPartners>
+                    </address>
+                    <channelId>1</channelId>
+                    <currency>DKK</currency>
+                    <orderLines>
+                        <orderLine id="1229">
+                            <quantity>4</quantity>
                             <prices>
-                                <price id="51">
-                                    <value>26000</value>
+                                <price id="undefined">
+                                    <value>198000</value>
                                 </price>
                             </prices>
-                            <product id="6" ver="1">
-                                <title>Dobbeltværelse (pris for 2 pers.)</title>
+                            <product id="739" ver="6">
+                                <title>80-Ã¥rs JubilÃ¦umstur fra GrenÃ¥ til Hundested</title>
                             </product>
                             <ticketIdentities>
-                                <ticketIdentity id="24">
+                                <ticketIdentity id="637">
                                     <type>barcode</type>
-                                    <code>5432758218607</code>
-                                    <barcodeType>EAN13</barcodeType>
+                                    <code>6770594316033</code>
                                     <scanLog/>
+                                    <barcodeType>EAN13</barcodeType>
                                 </ticketIdentity>
                             </ticketIdentities>
                         </orderLine>
@@ -772,13 +864,126 @@ NOTE: Only if an order is made using a sales channel, will the channel id be spe
                 </order>
             </orders>
 
-# Group Push Orders
++ Response 200 (application/json)
 
-## Push Order (realtime)
+    + Body
+
+            {
+                "908":
+                {
+                    "id":908,
+                    "insertTime":"2014-09-05T10:17:22+00:00",
+                    "modified":"2014-09-05T10:42:02+00:00",
+                    "address":
+                    {
+                        "id":267,
+                        "name":"Lone nielsen",
+                        "address":"Strandvejen 42",
+                        "zipCode":"3399",
+                        "city":"Hundested",
+                        "country":"Danmark",
+                        "phone":null,
+                        "email":"Spwm@hotmail.com",
+                        "newsletter":0,
+                        "newsletterPartners":0
+                    },
+                    "channelId":1,
+                    "externalOrderId":null,
+                    "currency":"DKK",
+                    "orderLines":
+                    {
+                        "1220":
+                        {
+                            "id":1220,
+                            "quantity":1,
+                            "prices":
+                            [
+                                {
+                                    "id":"undefined",
+                                    "value":49500
+                                }
+                            ],
+                            "product":
+                            {
+                                "id":749,
+                                "ver":7,
+                                "label":null,
+                                "title":"80-\u00e5rs jubil\u00e6umstur fra Hundested-Gren\u00e5"
+                            },
+                            "ticketIdentities":
+                            [
+                                {
+                                    "id":636,
+                                    "type":"barcode",
+                                    "code":"7610039911562",
+                                    "scanLog":[],
+                                    "barcodeType":"EAN13"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "916":
+                {
+                    "id":916,
+                    "insertTime":"2014-09-05T13:58:30+00:00",
+                    "modified":"2014-09-05T14:01:40+00:00",
+                    "address":
+                    {
+                        "id":268,
+                        "name":"Gotschalk Rejser",
+                        "address":"Thorsgade 57",
+                        "zipCode":"8410",
+                        "city":"R\u00f8nde",
+                        "country":null,
+                        "phone":"50226622",
+                        "email":"gotschalk@mail.dk",
+                        "newsletter":0,
+                        "newsletterPartners":0
+                    },
+                    "channelId":1,
+                    "externalOrderId":null,
+                    "currency":"DKK",
+                    "orderLines":
+                    {
+                        "1229":
+                        {
+                            "id":1229,
+                            "quantity":4,
+                            "prices":
+                            [
+                                {
+                                    "id":"undefined",
+                                    "value":198000
+                                }
+                            ],
+                            "product":
+                            {
+                                "id":739,
+                                "ver":6,
+                                "label":null,
+                                "title":"80-\u00e5rs Jubil\u00e6umstur fra Gren\u00e5 til Hundested"
+                            },
+                            "ticketIdentities":
+                            [
+                                {
+                                    "id":637,
+                                    "type":"barcode",
+                                    "code":"6770594316033",
+                                    "scanLog":[],
+                                    "barcodeType":"EAN13"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+
+# Group Push Orders
 
 With push orders, the orders are sent in real time to the provider. The provider then needs to send the barcodes back to Alletiders API, which will then create the ticket and complete the order. This requires the provider to implement CRUD functionality for an order and provide a RESTful service for the Alletiders API to fetch the barcodes.
 
-Depending on the sales channel, alletiders API can be responsible for sending the order confirmation email with the tickets. In order to be able to create them successfully, a barcode must be of type EAN13 or Code39.
+Depending on the sales channel, Alletiders API can be responsible for sending the order confirmation email with the tickets. In order to be able to create them successfully, a barcode must be of a support type. Please refer to the 'Barcode types' section for a list of supported types.
 
 Alternatively, if the sales channel chose to send order confirmations themselves, then the supported barcode types will vary. Please refer to the 'Barcode types' section to decide which barcode name to use.
 
@@ -796,7 +1001,9 @@ The first step in push order consists of the Alletiders API making a POST reques
 productLabel on the line tag is the product id specified when importing product, it will not be included if product was created in admin interface.
 
 + Request (application/xml)
+
     + Body
+
             <?xml version="1.0" encoding="UTF-8"?>
             <order id="1">
                 <created>2013-01-30T09:00:00+01:00</created>
@@ -826,7 +1033,9 @@ productLabel on the line tag is the product id specified when importing product,
             </order>
 
 + Response 201
+
     + Header
+
             Location: /order/{orderId}
 
 ## Create order - step 2/2 [/order/{orderId}]
@@ -835,9 +1044,9 @@ productLabel on the line tag is the product id specified when importing product,
 The second step consists of the Alletiders API making a GET request to the provider with the order id. Alletiders API expects the provider to return barcodes for the given order id. The orderId used here is the one extracted from location header from previously made POST request.
 
 + Response 200
-    + Header
-            Location: /order/{orderId}
+
     + Body
+
             <?xml version="1.0" encoding="UTF-8"?>
             <order>
                 <lines>
@@ -927,10 +1136,14 @@ Retrieve a list of supported languages.
                 }
             ]
 
-## Currency [/provider/currency]
+## Supported Currencies [/channel/currency?format={format}]
 ### Get Supported Currencies [GET]
 
 Retrieve a list of supported currencies.
+
++ Parameters
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
 
 + Response 200 (application/xml)
 
