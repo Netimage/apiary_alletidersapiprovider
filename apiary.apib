@@ -173,6 +173,20 @@ Parameters that you can specify in the request body:
             </ul>
         </td>
     </tr>
+    <tr>
+        <td>separateTickets</td>
+        <td>If tickets should be separated on the product when generating the pdf reciept. [true | false]</td>
+    </tr>
+    <tr>
+        <td>coords</td>
+        <td>
+            Geo-coordinates for the product in decimal degrees (signed degrees format).
+            <ul>
+                <li>latitude [float from -90 to 90, 8 decimal places]</li>
+                <li>longitude [float from -180 to 180, 8 decimal places]</li>
+            </ul>
+        </td>
+    </tr>
 </table>
 
 #### Calendar lines
@@ -251,6 +265,11 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                             </price>
                         </prices>
                     <inventory>10</inventory>
+                    <separateTickets>true</separateTickets>
+                    <coords>
+                        <latitude>57.024961</latitude>
+                        <longitude>9.940118</longitude>
+                    </coords>
                     </sale>
                     <owner id="234">
                         <name>Kim Jersin</name>
@@ -297,6 +316,11 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                             </price>
                         </prices>
                     </sale>
+                    <separateTickets>true</separateTickets>
+                    <coords>
+                        <latitude>57.024961</latitude>
+                        <longitude>9.940118</longitude>
+                    </coords>
                     <owner id="5634">
                         <name>sny</name>
                     </owner>
@@ -350,6 +374,11 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                             </price>
                         </prices>
                     </sale>
+                    <separateTickets>true</separateTickets>
+                    <coords>
+                        <latitude>57.024961</latitude>
+                        <longitude>9.940118</longitude>
+                    </coords>
                     <owner id="234">
                         <name>Kim Jersin</name>
                     </owner>
@@ -403,6 +432,11 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                             </price>
                         </prices>
                     </sale>
+                    <separateTickets>true</separateTickets>
+                    <coords>
+                        <latitude>57.024961</latitude>
+                        <longitude>9.940118</longitude>
+                    </coords>
                     <owner id="234">
                         <name>Kim Jersin</name>
                     </owner>
@@ -468,6 +502,57 @@ The GET method will show the current status of the import.
                 </error>
             </errors>
 
+## Upload product image [/provider/product-image]
+
+The product image upload endpoint can be used in two ways
++ Upload an image resource directly on an existing product
++ Upload an image resource on a transaction. This will expose the image to the transaction ID when products are uploaded
+
+### Upload file [POST]
+
+Uploads a file. If the transaction ID is set, and a file with the same label already exists, it will be overriden.
+
++ Parameters
+    + productLabel (string, required) - Product label. If the product already has an image, it will be replaced.
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
+    + transactionId (number, optional) - Transaction ID.
+
++ Request (multipart/form-data; boundary=---BOUNDARY)
+
+    + Body
+
+            -----BOUNDARY
+            Content-Disposition: form-data; name="image[file]"; filename="image.jpg"
+            Content-Type: image/jpeg
+            Content-Transfer-Encoding: base64
+
+            /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+            HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+            MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIA
+            AhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEB
+            AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
+            -----BOUNDARY
+
++ Response 200
+
+    OK
+
+    + Body
+
++ Response 400
+
+    Invalid parameters given
+
+    + Body
+            <?xml version="1.0" encoding="UTF-8"?>
+            <error application="Product Channel Manager (PCM)">
+                <message>Application error</message>
+                <exception>
+                    <message>productLabel is required</message>
+                    <code>502</code>
+                </exception>
+            </error>
 # Group Member Import
 
 Members include person, product, and ticket information. Since members are registered to a product, this product needs to be imported before the member is imported (if it does not exist  in Alletiders API already).  Furthermore in order to be able to scan tickets the product type needs to be subscription.
