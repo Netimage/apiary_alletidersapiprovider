@@ -138,12 +138,9 @@ Parameters that you can specify in the request body:
                     </ul>
                 </li>
             </ul>
-
             Standard products supports inventory update:<br>
             <ul><li>inventory [int] (positive value = add, negative = substract)</li></ul>
-
-            If inventory exists on the product, the new value will be added or substracted to the existing inventory.<br>
-
+            If inventory exists on the product, the new value will be added or substracted to the existing inventory.<br><br>
             additional options for accommodation only:
             <ul>
                 <li>interval_length* [number of days/weeks you have to book according to the interval_unit]</li>
@@ -411,7 +408,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </values>
                     </description>
                     <type>accommodation</type>
-                    <calendar sales_deadline="0" sales_deadline_unit="day">
+                    <calendar interval_length="1" interval_unit="day" sales_deadline="0" sales_deadline_unit="day">
                         <entry active="true">
                             <quantity>40</quantity>
                             <from>2013-08-29</from>
@@ -604,10 +601,8 @@ Parameters that you can specify in the request body:
             ticket identity consists of the following properties:<br>
             ticket code:<br>
                 <ul><li>code*  [type: varchar |maxlength: 255]</li></ul>
-
             type of the ticket code:<br>
                 <ul><li>type [type: varchar | maxlength:50] See suggested values</li></ul>
-
             the validation period:<br>
             <ul>
                 <li>valid
@@ -1113,6 +1108,9 @@ productLabel on the line tag is the product id specified when importing product,
                         <unitPrice>9950</unitPrice>
                         <quantity>2</quantity>
                         <providerId>1</providerId>
+                        <!-- Only applicable to booking and accommodation products -->
+                        <start>2013-02-10T09:00:00+01:00</start>
+                        <end>2013-02-11T09:00:00+01:00</end>
                     </line>
                 </lines>
             </order>
