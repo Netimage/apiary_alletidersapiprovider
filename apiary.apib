@@ -138,14 +138,24 @@ Parameters that you can specify in the request body:
                     </ul>
                 </li>
             </ul>
-            Standard products supports inventory update:<br>
-            <ul><li>inventory [int] (positive value = add, negative = substract)</li></ul>
-            If inventory exists on the product, the new value will be added or substracted to the existing inventory.<br><br>
             additional options for accommodation only:
             <ul>
                 <li>interval_length* [number of days/weeks you have to book according to the interval_unit]</li>
                 <li>interval_unit* [possible values: week | day | hour ] </li>
                 <li>week_days* [comma separated list of days as 1-7, 1 = Monday, 7 = Sunday]</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>usage</td>
+        <td>Accommodation products supports usage periods. Usage are created in the same way as sales with the same properties.</td>
+    </tr>
+    <tr>
+        <td>inventory</td>
+        <td>Standard products can have inventory added (positive value = add, negative = substract).
+            <ul>
+                <li>set [type: int](sets/ overrides inventory)</li>
+                <li>update [type: int](updates inventory)</li>
             </ul>
         </td>
     </tr>
@@ -173,6 +183,10 @@ Parameters that you can specify in the request body:
     <tr>
         <td>separateTickets</td>
         <td>If tickets should be separated on the product when generating the pdf reciept. [true | false]</td>
+    </tr>
+    <tr>
+        <td>vatFree</td>
+        <td>If product should be vat free or not. [true | false]</td>
     </tr>
     <tr>
         <td>coords</td>
@@ -261,13 +275,14 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                                 <value>600</value>
                             </price>
                         </prices>
+                    </sale>
                     <inventory>10</inventory>
                     <separateTickets>true</separateTickets>
+                    <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
                         <longitude>9.940118</longitude>
                     </coords>
-                    </sale>
                     <owner id="234">
                         <name>Kim Jersin</name>
                     </owner>
@@ -314,6 +329,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </prices>
                     </sale>
                     <separateTickets>true</separateTickets>
+                    <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
                         <longitude>9.940118</longitude>
@@ -350,7 +366,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </values>
                     </description>
                     <type>booking</type>
-                    <calendar interval_unit="day" sales_deadline="0" sales_deadline_unit="day">
+                    <calendar interval_unit="day" interval_length="2" sales_deadline="0" sales_deadline_unit="day">
                         <entry active="true">
                             <quantity>40</quantity>
                             <from>2013-08-29</from>
@@ -372,6 +388,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </prices>
                     </sale>
                     <separateTickets>true</separateTickets>
+                    <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
                         <longitude>9.940118</longitude>
@@ -429,7 +446,20 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                             </price>
                         </prices>
                     </sale>
+                    <usage interval_length="2" interval_unit="week" week_days="6,7">
+                        <from>2013-03-29T09:00:00+01:00</from>
+                        <to>2013-07-17T00:00:00+02:00</to>
+                        <prices>
+                            <price currency='DKK'>
+                                <value>1000</value>
+                            </price>
+                            <price currency='EUR'>
+                                <value>100</value>
+                            </price>
+                        </prices>
+                    </usage>
                     <separateTickets>true</separateTickets>
+                    <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
                         <longitude>9.940118</longitude>
@@ -520,15 +550,10 @@ Uploads a file. If the transaction ID is set, and a file with the same label alr
     + Body
 
             -----BOUNDARY
-            Content-Disposition: form-data; name="image[file]"; filename="image.jpg"
+            Content-Disposition: form-data; name="image"; filename="image.jpg"
             Content-Type: image/jpeg
-            Content-Transfer-Encoding: base64
 
-            /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
-            HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
-            MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIA
-            AhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEB
-            AAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AD//Z
+            [raw file data]
             -----BOUNDARY
 
 + Response 200
