@@ -124,6 +124,13 @@ Parameters that you can specify in the request body:
         </td>
     </tr>
     <tr>
+        <td>externalUrl**</td>
+        <td>
+            The external product booking link [type: text]<br/>
+            If set, the product will become an external product.
+        </td>
+    </tr>
+    <tr>
         <td>sale</td>
         <td>
             This is an array with the following key/value pairs:
@@ -183,6 +190,10 @@ Parameters that you can specify in the request body:
     <tr>
         <td>separateTickets</td>
         <td>If tickets should be separated on the product when generating the pdf reciept. [true | false]</td>
+    </tr>
+    <tr>
+        <td>experienceType</td>
+        <td>ID of experience type. The available types can be found with the experience-type api call. [type: int]</td>
     </tr>
     <tr>
         <td>vatFree</td>
@@ -278,6 +289,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                     </sale>
                     <inventory>10</inventory>
                     <separateTickets>true</separateTickets>
+                    <experienceType>4</experienceType>
                     <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
@@ -329,6 +341,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </prices>
                     </sale>
                     <separateTickets>true</separateTickets>
+                    <experienceType>4</experienceType>
                     <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
@@ -388,6 +401,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </prices>
                     </sale>
                     <separateTickets>true</separateTickets>
+                    <experienceType>4</experienceType>
                     <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
@@ -459,6 +473,7 @@ For more information see the [online documetation](http://docs.alletidersapi.dk/
                         </prices>
                     </usage>
                     <separateTickets>true</separateTickets>
+                    <experienceType>4</experienceType>
                     <vatFree>false</vatFree>
                     <coords>
                         <latitude>57.024961</latitude>
@@ -537,10 +552,10 @@ The product image upload endpoint can be used in two ways
 
 ### Upload file [POST]
 
-Uploads a file. If the transaction ID is set, and a file with the same label already exists, it will be overriden.
+Uploads either a single file or multiple files. The filename should be image (pass multiple image as an array).
 
 + Parameters
-    + productLabel (string, required) - Product label. If the product already has an image, it will be replaced.
+    + productLabel (string, required) - Product label. 
     + format: `xml` (string, optional) - Either json or xml.
         + Default: `json`
     + transactionId (number, optional) - Transaction ID.
@@ -550,10 +565,10 @@ Uploads a file. If the transaction ID is set, and a file with the same label alr
     + Body
 
             -----BOUNDARY
-            Content-Disposition: form-data; name="image"; filename="image.jpg"
+            Content-Disposition: form-data; name="image[file]"; filename="image.jpg"
             Content-Type: image/jpeg
 
-            [raw file data]
+            [raw file content]
             -----BOUNDARY
 
 + Response 200
@@ -575,6 +590,50 @@ Uploads a file. If the transaction ID is set, and a file with the same label alr
                     <code>502</code>
                 </exception>
             </error>
+## Experience types [/provider/experience-type?format={format}]
+### Get Supported experience types [GET]
+
+Retrieve a list of supported experience types.
+
++ Parameters
+    + format: `xml` (string, optional) - Either json or xml.
+        + Default: `json`
+
++ Response 200 (application/xml)
+
+    + Body
+
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <experience_types xmlns="http://netimage.dk/pcm/provider/experience-type">
+                <type id="1">Aktivitet</type>
+                <type id="2">Overnatning</type>
+                <type id="3">Transport</type>
+                <type id="4">Kombination af ovenstående</type>
+            </experience_types>
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "id":1,
+                    "title":"Aktivitet"
+                },
+                {
+                    "id":2,
+                    "title":"Overnatning"
+                },
+                {
+                    "id":3,
+                    "title":"Transport"
+                },
+                {
+                    "id":4,
+                    "title":"Kombination af ovenstående"
+                }
+            ]
+
 # Group Member Import
 
 Members include person, product, and ticket information. Since members are registered to a product, this product needs to be imported before the member is imported (if it does not exist  in Alletiders API already).  Furthermore in order to be able to scan tickets the product type needs to be subscription.
@@ -1244,7 +1303,7 @@ Retrieve a list of supported languages.
                 }
             ]
 
-## Supported Currencies [/channel/currency?format={format}]
+## Supported Currencies [/provider/currency?format={format}]
 ### Get Supported Currencies [GET]
 
 Retrieve a list of supported currencies.
@@ -1258,7 +1317,7 @@ Retrieve a list of supported currencies.
     + Body
 
             <?xml version="1.0" encoding="UTF-8"?>
-            <currencies xmlns="http://netimage.dk/pcm/channel/currency">
+            <currencies xmlns="http://netimage.dk/pcm/provider/currency">
                 <currency id="1">DKK</currency>
                 <currency id="2">EUR</currency>
                 <currency id="3">USD</currency>
